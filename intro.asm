@@ -6,6 +6,7 @@
 	jsr		INITIALIZE_GRAPHICS
 	lea		VDP_DATA,A0							; Load VDP Data Port.
 	lea		4(A0),A1							; Load VDP Control Port.
+	clr.l	D0									; Move $0 into D0
 	move.l	#$3FFF,D1
 	move.l	#$40000000,(A1)						; Point to Beginning of VRAM.
 CLEAR_VRAM_LOOP
@@ -221,22 +222,22 @@ PALETTE_FADE_IN_LOOP
 	rts
 
 Palette
-    dc.w %0000000000000000; ;0	%----BBB-GGG-RRR-
-    dc.w %0000111011101110; ;1	%----BBB-GGG-RRR-
-    dc.w %0000100010001000; ;2	%----BBB-GGG-RRR-
-    dc.w %0000001000100010; ;3	%----BBB-GGG-RRR-
-    dc.w %0000101010101010; ;4	%----BBB-GGG-RRR-
-    dc.w %0000110011001100; ;5	%----BBB-GGG-RRR-
-    dc.w %0000011001100110; ;6	%----BBB-GGG-RRR-
-    dc.w %0000010001000100; ;7	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;8	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;9	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;10	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;11	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;12	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;13	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;14	%----BBB-GGG-RRR-
-    dc.w %0000000000000000; ;15	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;0	%----BBB-GGG-RRR-
+	dc.w	%0000111011101110					; ;1	%----BBB-GGG-RRR-
+	dc.w	%0000100010001000					; ;2	%----BBB-GGG-RRR-
+	dc.w	%0000001000100010					; ;3	%----BBB-GGG-RRR-
+	dc.w	%0000101010101010					; ;4	%----BBB-GGG-RRR-
+	dc.w	%0000110011001100					; ;5	%----BBB-GGG-RRR-
+	dc.w	%0000011001100110					; ;6	%----BBB-GGG-RRR-
+	dc.w	%0000010001000100					; ;7	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;8	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;9	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;10	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;11	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;12	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;13	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;14	%----BBB-GGG-RRR-
+	dc.w	%0000000000000000					; ;15	%----BBB-GGG-RRR-
 PaletteEnd
 	even
 
