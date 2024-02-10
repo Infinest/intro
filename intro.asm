@@ -8,10 +8,16 @@
 	lea		4(A0),A1							; Load VDP Control Port.
 	clr.l	D0									; Move $0 into D0
 	move.l	#$3FFF,D1
-	move.l	#$40000000,(A1)						; Point to Beginning of VRAM.
+	move.l	#$40000000,(A1)						; Write to VRAM.
 CLEAR_VRAM_LOOP
 	move.l	#$0,(A0)							; Clear out VRAM.
 	dbra	D1,CLEAR_VRAM_LOOP					; Loop for next iteration.
+
+	move.l	#$13,D1
+	move.l	#$40000010,(A1)						; Write to VSRAM.
+CLEAR_VSRAM_LOOP
+	move.l	#$0,(A0)							; Clear out VSRAM.
+	dbra	D1,CLEAR_VSRAM_LOOP
 
 	jsr		DEFINE_TILES
 	jsr		WRITE_TILES_TO_SCREEN
