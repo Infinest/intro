@@ -2,7 +2,15 @@
 	VDP_CONTROL:		equ	$C00004
 	VDP_STATUS_VBLANK:	equ $000008
 
+	Z80_BUS_REQUEST:  	equ $A11100
+	Z80_RESET:			equ $A11200
+	YM_STATUS:			equ $A04000
+	YM_REGISTER_BANK_1:	equ $A04000
+	YM_REGISTER_BANK_2: equ $A04002
+	PSG_PORT:			equ $C00011
+
 	jsr		INITIALIZE_TMSS
+	jsr		INITIALIZE_SOUND
 	jsr		INITIALIZE_GRAPHICS
 	lea		VDP_DATA,A0							; Load VDP Data Port.
 	lea		4(A0),A1							; Load VDP Control Port.
@@ -52,6 +60,28 @@ INITIALIZE_TMSS
 	move.l	#'SEGA',($A14000)
 NO_TMSS
 	rts
+
+INITIALIZE_SOUND
+	move.w	#$100,Z80_RESET			; Kill YM2612 output
+	move.w  #$100,Z80_BUS_REQUEST
+.wait_z80
+    btst    #0,Z80_BUS_REQUEST
+    bne   	.wait_z80
+	lea.l	YM_REGISTER_BANK_1,A0
+	move.b	#$28,D0					; Clear Key-off register, only needs to be done on YM_REGISTER_BANK_1
+	move.b	#0,D1					; because the register is global
+	jsr		YM_SET_REGISTER
+	jsr		YM_STOP_CHANNELS
+	lea.l	YM_REGISTER_BANK_2,A0
+	jsr		YM_STOP_CHANNELS
+	move.w  #$0,Z80_BUS_REQUEST
+	move.w	#$0,Z80_RESET
+									; Kill PSG output
+	move.b	#$90|1<<5|$F,PSG_PORT	; $90 Write volume to PSG, 1<<5 Channel 1, $F lowest volume = mute
+	move.b	#$90|2<<5|$F,PSG_PORT	; $90 Write volume to PSG, 1<<5 Channel 2, $F lowest volume = mute
+	move.b	#$90|3<<5|$F,PSG_PORT	; $90 Write volume to PSG, 1<<5 Channel 3, $F lowest volume = mute
+	rts
+
 
 INITIALIZE_GRAPHICS
 	lea 	VDPSettings,A5
@@ -269,6 +299,29 @@ WaitVBlankEnd:
 	andi.w #VDP_STATUS_VBLANK,D0				; check if the vblank status flag is set
 	bne WaitVBlankEnd 							; wait for vblank to complete
 	rts											; exit
+
+WAIT_YM_READY:
+	move.b	YM_STATUS,D2		;Read in from $A04000
+	btst	#7,D2			
+	bne		WAIT_YM_READY		;Wait until Bit 7 is zero
+	rts
+
+YM_SET_REGISTER:
+	jsr		WAIT_YM_READY
+	move.b	d0,(a0)			;Write the register number to $A04000
+	jsr		WAIT_YM_READY
+	move.b	d1,(1,a0)		;Write the new value to $A04001
+	rts
+
+YM_STOP_CHANNELS:
+	move.b	#$0F,D1						; Clear key-off registers $80-$8E
+	move.b	#$80,D0
+.loop_set_release_rate
+	jsr		YM_SET_REGISTER
+	add.b	#$01,D0
+	cmpi.b	#$8E,D0
+	bls		.loop_set_release_rate
+	rts
 
 SEGA_LOGO
 	incbin	"INTRO_GRAPHICS.RAW"
